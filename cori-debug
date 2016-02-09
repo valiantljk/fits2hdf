@@ -1,0 +1,10 @@
+to debug a specific function, 
+first install that module, or make that module available in the path. 
+
+1. ipython
+2. import ipdb
+3. from module import function, e.g., from fits2hdf.io.fitsio import read_fits
+4. ipdb.set_trace()
+5. ipdb.pm()
+6. result=ipdb.runcall(function, arg0, arg1, kwarg='foo')
+e.g., result=ipdb.runcall(read_fits,'/global/cscratch1/sd/jialin/hdf-data/fittest/photoMatchPlate-3540-55127.fits','./hdf')

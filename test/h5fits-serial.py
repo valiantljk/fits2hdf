@@ -8,7 +8,7 @@ from fits2hdf import idi
 import numpy as np
 from astropy.io import fits as pf
 import h5py
-rootdir= "/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/"
+rootdir= "/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/spectra/"
 outputd ="/global/cscratch1/sd/jialin/hdf-data/v5_7_0-sample/sample/"
 #import progressbar as pb
 
