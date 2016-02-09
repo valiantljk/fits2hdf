@@ -366,7 +366,7 @@ def read_fits(infile, verbosity=0):
             #hdul_idi.add_table_hdu(hdul_fits.name,
             #                       header=header, data=idi_tbl, history=history, comment=comment)
             hdul_idi.add_table_hdu(hdul_fits.name, data=hdul_fits.data[:],
-                                   header=header, history=history, comment=comment)
+                                 header=header, history=history, comment=comment)
     return hdul_idi
 
 def create_fits(hdul, verbosity=0):
