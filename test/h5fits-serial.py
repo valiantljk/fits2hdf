@@ -8,7 +8,7 @@ from fits2hdf import idi
 import numpy as np
 from astropy.io import fits as pf
 import h5py
-rootdir= "/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/spectra/"
+#rootdir= "/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/spectra/"
 outputd ="/global/cscratch1/sd/jialin/hdf-data/v5_7_0-sample/sample/"
 #import progressbar as pb
 
@@ -19,17 +19,22 @@ def listfiles(x):
        if name.endswith((".fits", ".fits.gz"))]
      return fitsfiles
 
-def test_multihdf(x):
+def test_multihdf(rootdir,x):
      thedir = rootdir+str(x)+"/"
      try:
          count=0
          fitlist=listfiles(thedir)
+	 print thedir
          print "number of files %d" % len(fitlist)
          for fname in fitlist:
              #if "fits" in fname or "gz" in fname:
              a = read_fits(fname) 
              gname=fname.split('/')[-1]  
              outputf=outputd+str(x)+".h5"
+             #test creating sub-group
+             print gname
+             gname="subgroup/"+gname
+             print gname
              export_hdf(a, outputf, root_group=gname)
              count=count+1
      except TypeError:
@@ -37,12 +42,13 @@ def test_multihdf(x):
      finally:
          pass
 def h5fit_test1():
-     if (len(sys.argv)!=2):
-       print "usage: python -W ignore h5fits-serial.py input_folder_name"
-       print "example: python h5fits-serial.py 4440"
+     if (len(sys.argv)!=3):
+       print "usage: python -W ignore h5fits-serial.py rootdir input_folder_name"
+       print "example: python h5fits-serial.py /global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/ 4440"
        print "*****************End********************"
        sys.exit(1)
-     input=sys.argv[1]
+     rootdir=sys.argv[1]
+     input=sys.argv[2]
      thedir = rootdir+str(input)+"/"
      numfits = listfiles(thedir)
      print "*****************Start******************"
@@ -56,7 +62,7 @@ def h5fit_test1():
      #progvar = 0
      #for i in range(500000):
      start = time.time()
-     test_multihdf(input)
+     test_multihdf(rootdir, input)
      end = time.time()
       #progress.update(progvar + 1)
       #progvar += 1
