@@ -24,18 +24,25 @@ def test_multihdf(rootdir,x):
      try:
          count=0
          fitlist=listfiles(thedir)
-	 print thedir
-         print "number of files %d" % len(fitlist)
+	 #print thedir
+         #print "number of files %d" % len(fitlist)
          for fname in fitlist:
              #if "fits" in fname or "gz" in fname:
              a = read_fits(fname) 
-             gname=fname.split('/')[-1]  
+	     commonpath=os.path.commonprefix([fname,thedir])
+	     #print "commonpath:"+commonpath
+ 	     #print "fname:"+fname
+	     subgroup=fname[len(commonpath):len(fname)]
+             #gname=fname.split('/')[-1]  
              outputf=outputd+str(x)+".h5"
              #test creating sub-group
-             print gname
-             gname="subgroup/"+gname
-             print gname
-             export_hdf(a, outputf, root_group=gname)
+             #print gname
+             #gname="subgroup/"+gname
+             #print gname
+             #export_hdf(a, outputf, root_group=gname)
+	     #print "original file name: "+gname
+ 	     #print "sub path: "+subgroup
+	     export_hdf(a,outputf, root_group=subgroup)
              count=count+1
      except TypeError:
          print x
