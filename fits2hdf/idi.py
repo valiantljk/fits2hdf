@@ -14,8 +14,10 @@ import numpy as np
 from astropy.extern import six
 from astropy.table import Table, Column, MaskedColumn
 from astropy.nddata import NDData
-from ordereddict import OrderedDict
-
+try: 
+ from ordereddict import OrderedDict
+except ImportError:
+ from collections import OrderedDict
 
 class VerificationError(Exception):
     """ Custom data verification exception """

@@ -8,10 +8,8 @@ from fits2hdf import idi
 import numpy as np
 from astropy.io import fits as pf
 import h5py
-#rootdir= "/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/spectra/"
-outputd ="/global/cscratch1/sd/jialin/hdf-data/v5_7_0-sample/sample/"
-#import progressbar as pb
-
+rootdir="/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/"
+outputdir ="/global/cscratch1/sd/jialin/hdf-data/v5_7_0/"
 def listfiles(x):
      fitsfiles = [os.path.join(root, name)
        for root, dirs, files in os.walk(x)
@@ -19,29 +17,16 @@ def listfiles(x):
        if name.endswith((".fits", ".fits.gz"))]
      return fitsfiles
 
-def test_multihdf(rootdir,x):
+def test_multihdf(x):
      thedir = rootdir+str(x)+"/"
      try:
          count=0
          fitlist=listfiles(thedir)
-	 #print thedir
-         #print "number of files %d" % len(fitlist)
-         for fname in fitlist:
-             #if "fits" in fname or "gz" in fname:
+	 for fname in fitlist:
              a = read_fits(fname) 
 	     commonpath=os.path.commonprefix([fname,thedir])
-	     #print "commonpath:"+commonpath
- 	     #print "fname:"+fname
 	     subgroup=fname[len(commonpath):len(fname)]
-             #gname=fname.split('/')[-1]  
-             outputf=outputd+str(x)+".h5"
-             #test creating sub-group
-             #print gname
-             #gname="subgroup/"+gname
-             #print gname
-             #export_hdf(a, outputf, root_group=gname)
-	     #print "original file name: "+gname
- 	     #print "sub path: "+subgroup
+             outputf=outputdir+str(x)+".h5"
 	     export_hdf(a,outputf, root_group=subgroup)
              count=count+1
      except TypeError:
@@ -49,13 +34,16 @@ def test_multihdf(rootdir,x):
      finally:
          pass
 def h5fit_test1():
-     if (len(sys.argv)!=3):
-       print "usage: python -W ignore h5fits-serial.py rootdir input_folder_name"
-       print "example: python h5fits-serial.py /global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/ 4440"
+     if (len(sys.argv)!=4):
+       print "usage: python -W ignore h5fits-serial.py rootdir input_folder_name outputdir"
+       print "example: python h5fits-serial.py /global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/ 4440 /global/cscratch1/sd/jialin/hdf-data/v5_7_0/"
        print "*****************End********************"
        sys.exit(1)
+     global rootdir
+     global outputdir
      rootdir=sys.argv[1]
      input=sys.argv[2]
+     outputdir=sys.argv[3]
      thedir = rootdir+str(input)+"/"
      numfits = listfiles(thedir)
      print "*****************Start******************"
@@ -65,14 +53,9 @@ def h5fit_test1():
         print "*****************End********************"
         sys.exit(1)
      print "****************In Progress*************"
-     #progress = pb.ProgressBar(widgets=_widgets, maxval = 500000).start()
-     #progvar = 0
-     #for i in range(500000):
      start = time.time()
-     test_multihdf(rootdir, input)
+     test_multihdf(input)
      end = time.time()
-      #progress.update(progvar + 1)
-      #progvar += 1
      print "Combined",len(numfits),"fits to hdf5, costs ", end-start, " seconds"
      print "Check output at ", outputd
      print "*****************End********************"
