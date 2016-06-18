@@ -10,45 +10,33 @@ from astropy.io import fits as pf
 import h5py
 from multiprocessing import Pool
 import time
-rootdir="/project/projectdirs/cosmo/data/sdss/dr12/boss/photoObj/301"
+totalist=[]
+rootdir="/project/projectdirs/cosmo/data/sdss/dr12/boss/photoObj/301/"
 outputdir="/scratch1/scratchdirs/jialin/celestial/dr12"
 #function for listing all fits files and fits.gz files inside given path and all sub-folders
 def listfiles(x):
+     print rootdir+str(x)+'/'+str(1) 
      fitsfiles = [os.path.join(root, name)
        for inx in range(1,7)
-       for root, dirs, files in os.walk(x+str(inx))
+       for root, dirs, files in os.walk(rootdir+str(x)+'/'+str(inx))
        for name in files
        if name.endswith((".fits", ".fits.gz"))]
-     return fitsfiles
+     global totalist
+     totalist=totalist+fitsfiles
 #function for combining one fits folder into a single HDF5 file
 def test_multihdf(x):
-     print "input dir: ",x
-     thedir = rootdir+str(x)+"/"
-     try:
-         count=0
-         fitlist=listfiles(thedir)
-         print "number of files %d" % len(fitlist), "in ", thedir
-         for fname in fitlist:
-             try: 
-                a = read_fits(fname) 
-		#commonpath=os.path.commonprefix([fname,thedir])
-		#subgroup=fname[len(commonpath):len(fname)]
-		import ntpath
-		ffname=str(ntpath.basename(fname))
-		outputf=outputdir+ffname+".h5"
-                export_hdf(a, outputf)
-                count=count+1
-             except Exception, e:
-		print "ioerror:%s"%e, fname
-             finally:
-		pass
-     except TypeError:
-         print x
-     finally:
-         pass
-def myfilter(x):
-    if down < x and x < up:
-      return x
+    assert os.path.isfile(x)
+    fname=x
+    try: 
+        a = read_fits(fname) 
+        import ntpath
+        ffname=str(ntpath.basename(fname))
+        outputf=outputdir+ffname.split('.')[0]+".h5"
+        export_hdf(a, outputf)
+    except Exception, e:
+        print "ioerror:%s"%e, fname
+    finally:
+        pass
 def parallel_test_multihdf():
      if (len(sys.argv)!=6):
        print "usage: python -W ignore h5fits-parallel.py number_of_processes start end rootdir outputdir"
@@ -68,10 +56,25 @@ def parallel_test_multihdf():
 	outputdir=outputdir+"/"
      ldir=os.listdir(rootdir)    
      lldir=[fn for fn in ldir if fn.isdigit()]
+     print len(lldir)
      lldir=map(int,lldir)
      lldir.sort()
-     lldir=lldir[down:up]
-     #lldir=list([x for x in lldir if x>down and x<up])
+     if up>len(lldir): 
+	up=len(lldir)
+     if down<0:
+        down=0
+     if down>len(lldir):
+	down=0
+     if down>up:
+        temp=up
+	up=down
+	down=temp
+     lldir=lldir[down:up]#the range to be processed
+     global totalist
+     map(listfiles,lldir)
+   
+     lldir=totalist
+     print totalist[0]
      print "*****************Start******************"
      print "Totally, ", len(lldir), "fits folders,e.g., 4440 in root folder: ", rootdir
      if (len(lldir)==0):
@@ -87,7 +90,7 @@ def parallel_test_multihdf():
      p.map(test_multihdf,lldir)
      end = time.time()
      print "Combined",len(lldir),"fits folder(",down,"-",up,") to hdf5 files, costs ", end-start, " seconds"
-     print "Check output at ", outputd
+     print "Check output at ", outputdir
      print "*****************End********************"
 if __name__ == '__main__':
     parallel_test_multihdf()
