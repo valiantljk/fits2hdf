@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p regular
 #SBATCH -N 50
-#SBATCH -t 00:20:00
+#SBATCH -t 00:50:00
 #SBATCH -J fits2hdf-parallel
 #SBATCH -e %j.err
 #SBATCH -o %j.out
