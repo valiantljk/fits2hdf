@@ -10,12 +10,14 @@ from astropy.io import fits as pf
 import h5py
 from multiprocessing import Pool
 import time
+import csv
 totalist=[]
 rootdir="/project/projectdirs/cosmo/data/sdss/dr12/boss/photoObj/301/"
 outputdir="/scratch1/scratchdirs/jialin/celestial/dr12"
 #function for listing all fits files and fits.gz files inside given path and all sub-folders
+prescanned="selected_files_938046.out"
 def listfiles(x):
-     print rootdir+str(x)+'/'+str(1) 
+     #print rootdir+str(x)+'/'+str(1) 
      fitsfiles = [os.path.join(root, name)
        for inx in range(1,7)
        for root, dirs, files in os.walk(rootdir+str(x)+'/'+str(inx))
@@ -54,29 +56,37 @@ def parallel_test_multihdf():
 	rootdir=rootdir+"/"
      if(not outputdir.endswith("/")):
 	outputdir=outputdir+"/"
-     ldir=os.listdir(rootdir)    
-     lldir=[fn for fn in ldir if fn.isdigit()]
-     print len(lldir)
-     lldir=map(int,lldir)
-     lldir.sort()
-     if up>len(lldir): 
-	up=len(lldir)
-     if down<0:
-        down=0
-     if down>len(lldir):
-	down=0
-     if down>up:
-        temp=up
-	up=down
-	down=temp
-     lldir=lldir[down:up]#the range to be processed
+     #ldir=os.listdir(rootdir)    
+     #lldir=[fn for fn in ldir if fn.isdigit()]
+     print "****************Start*******************"
+     csv_tstart=time.time()
+     print csv_tstart
      global totalist
-     map(listfiles,lldir)
-   
-     lldir=totalist
-     print totalist[0]
-     print "*****************Start******************"
-     print "Totally, ", len(lldir), "fits folders,e.g., 4440 in root folder: ", rootdir
+     try:
+	 with open(prescanned,'rb') as f:
+	  reader = csv.reader(f)
+	  totalist = list(reader)
+
+     except Exception, e:
+	 print ("input csv read error or not exist: %s"%e,prescanned)
+     totalist = [x for sublist in totalist for x in sublist]
+     print "csv reads costs %.2f seconds"%(time.time()-csv_tstart)
+     #map(listfiles,lldir)
+     #if(len(totalist)>0):
+     # selected_f="selected_files_"+str(len(totalist))+".out"
+     # print("Selected file info saved in %s"%str(selected_f))
+     #with open(selected_f,"wb") as f:
+     # f.writelines(["%s\n" % item  for item in totalist])     
+     #print totalist[0] 
+     lenfits=len(totalist)
+     if down>up:
+      (down,up)=(up,down)
+     down = (0,down)[down>0] 
+     up = (lenfits,up)[up<lenfits]  
+     lldir=totalist[down:up]
+     print "total number of fits:%d"%len(totalist)
+     #print "*****************Start******************"
+     print "Going to process %d fits files in %s"%(len(lldir),rootdir)
      if (len(lldir)==0):
         print "No fits folder exists, Exit program"
         print "*****************End********************"
@@ -89,7 +99,7 @@ def parallel_test_multihdf():
      p=Pool(n)
      p.map(test_multihdf,lldir)
      end = time.time()
-     print "Combined",len(lldir),"fits folder(",down,"-",up,") to hdf5 files, costs ", end-start, " seconds"
+     print "Combined",len(lldir),"fits folder(",down,"-",up,") to hdf5 files, costs %.2f seconds "%(end-start)
      print "Check output at ", outputdir
      print "*****************End********************"
 if __name__ == '__main__':
